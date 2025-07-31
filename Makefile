@@ -35,7 +35,7 @@ run-only: ## Run the container (assumes image is already built)
 		docker run -d \
 			--name $(CONTAINER_NAME) \
 			-p $(HOST_PORT):$(PORT) \
-			--env-file env \
+			--env-file .env \
 			$(IMAGE_NAME); \
 		echo "✅ Container started on http://localhost:$(HOST_PORT)"; \
 	fi
@@ -53,7 +53,7 @@ dev: ## Run container with volume mounts for development
 	docker run -d \
 		--name $(CONTAINER_NAME) \
 		-p $(HOST_PORT):$(PORT) \
-		--env-file env \
+		--env-file .env \
 		-v $$(pwd)/templates:/app/templates \
 		-v $$(pwd)/static:/app/static \
 		-v $$(pwd)/app.py:/app/app.py \
