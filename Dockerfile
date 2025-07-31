@@ -16,7 +16,7 @@ RUN apt update && apt install -y \
 RUN mkdir -p /app
 
 # copy app files
-COPY env /app/.env
+COPY .env /app/.env
 COPY app.py /app/app.py
 COPY atom_agent-advanced.py /app/atom_agent-advanced.py
 COPY atom_agent-simple.py /app/atom_agent-simple.py
