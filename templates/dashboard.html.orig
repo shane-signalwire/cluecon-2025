@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Max Electric{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-section">
+                <h1 class="display-6 text-electric fw-bold">
+                    <i class="fas fa-tachometer-alt me-3"></i>
+                    Welcome back, {{ customer.first_name }}!
+                </h1>
+                <p class="lead text-muted">
+                    Here's your account overview and current balance information.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Summary Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Current Balance Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="summary-card balance-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-dollar-sign me-2"></i>Current Balance
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="balance-amount" id="balance-display">
+                        ${{ "%.2f"|format(customer.balance) }}
+                    </div>
+                    <div class="balance-status">
+                        {% if customer.balance == 0 %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i>Paid in Full
+                            </span>
+                        {% elif customer.balance > 0 %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Amount Due
+                            </span>
+                        {% endif %}
+                    </div>
+                    <button class="btn btn-electric btn-sm mt-3" onclick="refreshBalance()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh Balance
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="summary-card info-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-user me-2"></i>Account Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <strong>Account Number:</strong>
+                        <span>{{ customer.account_number }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Name:</strong>
+                        <span>{{ customer.first_name }} {{ customer.last_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Phone:</strong>
+                        <span>{{ customer.phone or 'Not provided' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Service Address:</strong>
+                        <span>{{ customer.address or 'Not provided' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="col-lg-4 col-md-12">
+            <div class="summary-card actions-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if customer.balance > 0 %}
+                            <button class="btn btn-electric" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                <i class="fas fa-credit-card me-2"></i>Make Payment
+                            </button>
+                        {% endif %}
+                        <button class="btn btn-outline-electric" onclick="viewUsage()">
+                            <i class="fas fa-chart-line me-2"></i>View Usage
+                        </button>
+                        <button class="btn btn-outline-electric" onclick="contactSupport()">
+                            <i class="fas fa-headset me-2"></i>Contact Support
+                        </button>
+                        <button class="btn btn-outline-electric" onclick="downloadBill()">
+                            <i class="fas fa-download me-2"></i>Download Bill
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Energy Usage Chart Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="chart-section">
+                <h3 class="text-electric mb-4">
+                    <i class="fas fa-chart-area me-2"></i>Energy Usage Overview
+                </h3>
+                <div class="chart-container">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="activity-section">
+                <h3 class="text-electric mb-4">
+                    <i class="fas fa-history me-2"></i>Recent Activity
+                </h3>
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h6>Monthly Bill Generated</h6>
+                            <p class="text-muted">Your December 2024 bill is now available</p>
+                            <small class="text-muted">2 days ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-zap"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h6>Usage Reading</h6>
+                            <p class="text-muted">Meter reading completed for this month</p>
+                            <small class="text-muted">5 days ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h6>Service Connection</h6>
+                            <p class="text-muted">Your service is active and running normally</p>
+                            <small class="text-muted">1 week ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="help-banner">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4 class="text-white mb-2">
+                            <i class="fas fa-question-circle me-2"></i>Need Help?
+                        </h4>
+                        <p class="text-white mb-0">
+                            Our customer service team is available 24/7 to assist you with any questions or concerns.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <button class="btn btn-light btn-lg" onclick="contactSupport()">
+                            <i class="fas fa-phone me-2"></i>Contact Support
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="fas fa-phone me-2"></i>Secure Payment Support
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <!-- AI Agent Information -->
+                        <div class="alert alert-info border-0 mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-robot fa-2x text-electric"></i>
+                                </div>
+                                <div class="col">
+                                    <h5 class="alert-heading mb-2">Connect with Atom, Our AI Assistant</h5>
+                                    <p class="mb-0">You'll be connected to our secure AI agent who will guide you through the payment process. Your information is protected with bank-level encryption.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Summary -->
+                        <div class="welcome-section mb-4">
+                            <h5 class="text-electric mb-3">
+                                <i class="fas fa-user-circle me-2"></i>Payment for Account: {{ customer.account_number }}
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <strong>Customer:</strong>
+                                        <span>{{ customer.first_name }} {{ customer.last_name }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <strong>Current Balance:</strong>
+                                        <span class="text-warning fw-bold">${{ "%.2f"|format(customer.balance) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Features -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                                    <h6 class="text-success">Secure Connection</h6>
+                                    <small class="text-muted">Bank-level encryption</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-clock fa-2x text-electric mb-2"></i>
+                                    <h6 class="text-electric">24/7 Available</h6>
+                                    <small class="text-muted">Always ready to help</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-keyboard fa-2x text-info mb-2"></i>
+                                    <h6 class="text-info">DTMF Support</h6>
+                                    <small class="text-muted">Keyboard tones (0-9, *, #)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Call Button -->
+                        <div class="text-center">
+                            <button id="modalPaymentCallButton" class="btn btn-electric btn-lg px-5">
+                                <i class="fas fa-phone me-2"></i>Start Secure Payment Call
+                            </button>
+                            <p class="text-muted mt-2 mb-0">
+                                <small><i class="fas fa-info-circle me-1"></i>During your call, use keyboard keys 0-9, *, # to enter payment information securely</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <small class="text-muted">
+                    <i class="fas fa-lock me-1"></i>Powered by SignalWire • Secure Payment Processing
+                </small>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SignalWire Call Widget (V3) for Modal -->
+<call-widget
+    button-id="modalPaymentCallButton"
+    token="{{ signalwire_call_token }}"
+    destination="{{ signalwire_call_destination }}"
+    support-audio="true"
+    support-video="false"
+    window-mode="audio+transcript"
+    log-level="info"
+></call-widget>
+
+<!-- Load SignalWire Call Widget Scripts -->
+<!-- V3 Widget Script -->
+<script src="https://cdn.jsdelivr.net/npm/@signalwire/call-widget/dist/call-widget-full.min.js"></script>
+<!-- V2 Widget Script -->
+<script src="https://cdn.jsdelivr.net/npm/@signalwire/call-widget/dist/c2c-widget-full.umd.min.js"></script>
+
+<script>
+// DTMF functionality (keyboard only)
+let currentCall = null;
+let isCallActive = false;
+
+// Send DTMF tone
+async function sendDTMF(digit) {
+    if (!currentCall || !isCallActive) {
+        console.warn('No active call to send DTMF to');
+        return;
+    }
+
+    try {
+        console.log(`Sending DTMF: ${digit}`);
+        
+        // Try multiple methods to send DTMF based on SignalWire patterns
+        if (currentCall.sendDigits) {
+            await currentCall.sendDigits(digit);
+        } else if (window.call && window.call.sendDigits) {
+            await window.call.sendDigits(digit);
+        } else if (currentCall.member && currentCall.member.sendDigits) {
+            await currentCall.member.sendDigits(digit);
+        } else {
+            console.error('sendDigits method not found on call object');
+            return;
+        }
+        
+        console.log(`DTMF ${digit} sent successfully`);
+        
+        // Send analytics to Flask app
+        fetch('/api/call-status', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                event: 'dtmf_sent', 
+                digit: digit,
+                timestamp: new Date().toISOString(),
+                page: 'dashboard_modal'
+            })
+        }).catch(console.error);
+        
+    } catch (error) {
+        console.error('Error sending DTMF:', error);
+    }
+}
+
+// Handle call connection
+function handleCallConnected(call) {
+    console.log('Call connected, DTMF keyboard enabled');
+    currentCall = call || window.call;
+    isCallActive = true;
+    
+    // Send analytics
+    fetch('/api/call-status', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            event: 'call_connected', 
+            timestamp: new Date().toISOString(),
+            page: 'dashboard_modal'
+        })
+    }).catch(console.error);
+}
+
+// Handle call disconnection
+function handleCallDisconnected() {
+    console.log('Call disconnected, DTMF disabled');
+    currentCall = null;
+    isCallActive = false;
+    
+    // Send analytics
+    fetch('/api/call-status', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            event: 'call_ended', 
+            timestamp: new Date().toISOString(),
+            page: 'dashboard_modal'
+        })
+    }).catch(console.error);
+}
+
+// Payment modal call widget functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Keyboard DTMF functionality
+    document.addEventListener('keydown', (event) => {
+        if (!isCallActive) return;
+
+        const key = event.key;
+        
+        // DTMF keys (0-9, *, #)
+        if (/[0-9*#]/.test(key)) {
+            event.preventDefault();
+            sendDTMF(key);
+        }
+    });
+
+    // Widget Event Listeners (V3) for modal button
+    const widget = document.querySelector('call-widget[button-id="modalPaymentCallButton"]');
+    
+    if (widget) {
+        widget.addEventListener('beforeDial', function(event) {
+            console.log('Modal payment call about to start', event);
+            
+            // Close the modal automatically when call starts
+            const paymentModal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+            if (paymentModal) {
+                paymentModal.hide();
+            }
+            
+            // Send analytics
+            fetch('/api/call-status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    event: 'call_started', 
+                    timestamp: new Date().toISOString(),
+                    page: 'dashboard_modal'
+                })
+            }).catch(console.error);
+        });
+        
+        // Listen for V3 call start events
+        const callStartEvents = ['callStarted', 'call.joined', 'callJoined'];
+        callStartEvents.forEach(eventName => {
+            widget.addEventListener(eventName, function(event) {
+                console.log(`V3 Modal Widget: ${eventName}`, event);
+                const call = event.detail?.call || window.call;
+                handleCallConnected(call);
+            });
+        });
+        
+        // Listen for V3 call end events
+        const callEndEvents = ['callEnded', 'call.left', 'destroy'];
+        callEndEvents.forEach(eventName => {
+            widget.addEventListener(eventName, function(event) {
+                console.log(`V3 Modal Widget: ${eventName}`, event);
+                handleCallDisconnected();
+            });
+        });
+    }
+
+    // Fallback: Check for window.call periodically
+    setInterval(() => {
+        if (window.call && !currentCall) {
+            console.log('Found call object on window, enabling DTMF');
+            handleCallConnected(window.call);
+        } else if (!window.call && currentCall) {
+            console.log('Call object removed from window, disabling DTMF');
+            handleCallDisconnected();
+        }
+    }, 2000);
+});
+
+// Existing dashboard functions
+function refreshBalance() {
+    const balanceDisplay = document.getElementById('balance-display');
+    const refreshBtn = document.querySelector('button[onclick="refreshBalance()"]');
+    
+    // Show loading state
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+    refreshBtn.disabled = true;
+    
+    fetch('/api/balance')
+        .then(response => response.json())
+        .then(data => {
+            if (data.balance !== undefined) {
+                balanceDisplay.textContent = '$' + data.balance.toFixed(2);
+                
+                // Update status badge
+                const statusBadge = document.querySelector('.balance-status .badge');
+                if (data.balance === 0) {
+                    statusBadge.className = 'badge bg-success';
+                    statusBadge.innerHTML = '<i class="fas fa-check-circle me-1"></i>Paid in Full';
+                } else if (data.balance > 0) {
+                    statusBadge.className = 'badge bg-warning';
+                    statusBadge.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Amount Due';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing balance:', error);
+            alert('Unable to refresh balance. Please try again.');
+        })
+        .finally(() => {
+            // Reset button state
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Refresh Balance';
+            refreshBtn.disabled = false;
+        });
+}
+
+// Quick action functions
+function makePayment() {
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    paymentModal.show();
+}
+
+function viewUsage() {
+    alert('Usage history feature coming soon!');
+}
+
+function contactSupport() {
+    alert('Redirecting to customer support...\n\nPhone: 1-800-MAX-ELEC\nEmail: support@maxelectric.com');
+}
+
+function downloadBill() {
+    alert('Bill download feature coming soon!');
+}
+</script>
+{% endblock %}

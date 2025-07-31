@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Support - Max Electric{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center min-vh-75 align-items-center">
+            <div class="col-lg-8">
+                <div class="hero-content text-center">
+                    <h1 class="display-4 fw-bold text-electric mb-4">
+                        <i class="fas fa-phone text-warning me-3"></i>
+                        Payment Support
+                    </h1>
+                    
+                    {% if session and session.customer_id %}
+                        <p class="lead mb-4">
+                            Hello {{ session.customer_name }}! Ready to make a secure payment over the phone?
+                        </p>
+                        
+                        <!-- Customer Account Summary -->
+                        <div class="welcome-section mb-4">
+                            <h4 class="text-electric mb-3">
+                                <i class="fas fa-user-circle me-2"></i>Your Account Details
+                            </h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <strong>Account Number:</strong>
+                                        <span>{{ session.account_number }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <strong>Payment Status:</strong>
+                                        <span class="text-success fw-bold">Ready to Pay Securely</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="lead mb-4">
+                            Get help with your electric bill payment through our secure phone system.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="service-card text-center h-100">
+                    <div class="service-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h4 class="text-electric mb-3">Quick Payment Processing</h4>
+                    <p class="text-muted">Pay your electric bill over the phone in minutes with our secure AI assistant.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="service-card text-center h-100">
+                    <div class="service-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4 class="text-electric mb-3">Secure & Safe</h4>
+                    <p class="text-muted">Your payment information is protected with bank-level security and encryption.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="service-card text-center h-100">
+                    <div class="service-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h4 class="text-electric mb-3">AI Assistant Support</h4>
+                    <p class="text-muted">Atom, our friendly AI assistant, will guide you through the secure payment process.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Badge -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-6">
+                <div class="security-info text-center">
+                    <i class="fas fa-lock me-2"></i>
+                    <strong>End-to-end encrypted payment processing</strong>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call Widget Section -->
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="summary-card text-center">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-phone me-2"></i>Start Your Payment Call
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        {% if session and session.customer_id %}
+                            <button id="paymentCallButton" class="btn btn-electric btn-lg mb-3">
+                                <i class="fas fa-phone me-2"></i>Call to Make Payment
+                            </button>
+                        {% else %}
+                            <button id="paymentCallButton" class="btn btn-electric btn-lg mb-3">
+                                <i class="fas fa-phone me-2"></i>Call for Payment Support
+                            </button>
+                        {% endif %}
+                        
+                        <div class="help-section mt-4">
+                            <h5 class="text-electric mb-3">
+                                <i class="fas fa-keyboard me-2"></i>DTMF Keypad Support
+                            </h5>
+                            <p class="text-muted mb-0">
+                                During your call, use your keyboard (0-9, *, #) to send secure payment tones
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Links -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-electric">
+                        <i class="fas fa-home me-2"></i>Home
+                    </a>
+                    {% if session and session.customer_id %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-electric">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-electric">
+                            <i class="fas fa-sign-in-alt me-2"></i>Account Login
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('call_demo') }}" class="btn btn-outline-electric">
+                        <i class="fas fa-palette me-2"></i>Widget Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Help Banner -->
+<section class="py-4">
+    <div class="container">
+        <div class="help-banner text-center">
+            <h4 class="mb-2">Need Help?</h4>
+            <p class="mb-0">Our AI assistant Atom is available 24/7 to help with your payment questions and guide you through the secure payment process.</p>
+        </div>
+    </div>
+</section>
+
+<!-- SignalWire Call Widget (V3) -->
+<!-- <call-widget
+    button-id="paymentCallButton"
+    token="{{ signalwire_call_token }}"
+    destination="{{ signalwire_call_destination }}"
+    support-audio="true"
+    support-video="false"
+    window-mode="audio+transcript"
+    log-level="info"
+></call-widget> -->
+<call-widget
+    button-id="paymentCallButton"
+    token="{{ signalwire_call_token }}"
+    callDetails='{"destination":"{{ signalwire_call_destination }}", "supportAudio":true, "supportVideo":false, "windowMode":"audio+transcript"}'
+    collectUserDetails="false"
+    userVariables='{"user_type": "guest"}'
+></call-widget>
+
+<!-- Load SignalWire Call Widget Scripts (Both V3 and V2 like in the demo) -->
+<!-- V3 Widget Script -->
+<script src="https://cdn.jsdelivr.net/npm/@signalwire/call-widget/dist/call-widget-full.min.js"></script>
+
+<!-- V2 Widget Script -->
+<script src="https://cdn.jsdelivr.net/npm/@signalwire/call-widget/dist/c2c-widget-full.umd.min.js"></script>
+
+<script>
+    // DTMF functionality (keyboard only)
+    let currentCall = null;
+    let isCallActive = false;
+
+    // Send DTMF tone
+    async function sendDTMF(digit) {
+        if (!currentCall || !isCallActive) {
+            console.warn('No active call to send DTMF to');
+            return;
+        }
+
+        try {
+            console.log(`Sending DTMF: ${digit}`);
+            
+            // Try multiple methods to send DTMF based on SignalWire patterns
+            if (currentCall.sendDigits) {
+                await currentCall.sendDigits(digit);
+            } else if (window.call && window.call.sendDigits) {
+                await window.call.sendDigits(digit);
+            } else if (currentCall.member && currentCall.member.sendDigits) {
+                await currentCall.member.sendDigits(digit);
+            } else {
+                console.error('sendDigits method not found on call object');
+                return;
+            }
+            
+            console.log(`DTMF ${digit} sent successfully`);
+            
+        } catch (error) {
+            console.error('Error sending DTMF:', error);
+        }
+    }
+
+    // Handle call connection
+    function handleCallConnected(call) {
+        console.log('Call connected, DTMF keyboard enabled');
+        currentCall = call || window.call;
+        isCallActive = true;
+    }
+
+    // Handle call disconnection
+    function handleCallDisconnected() {
+        console.log('Call disconnected, DTMF disabled');
+        currentCall = null;
+        isCallActive = false;
+    }
+
+    // Event listeners for widget events
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure button is clickable
+        const button = document.getElementById('paymentCallButton');
+        if (button) {
+            button.classList.remove('demo-button-disabled');
+            button.style.pointerEvents = 'auto';
+            button.style.opacity = '1';
+            console.log('Payment button enabled and ready');
+        }
+        
+        // Keyboard DTMF functionality
+        document.addEventListener('keydown', (event) => {
+            if (!isCallActive) return;
+
+            const key = event.key;
+            
+            // DTMF keys (0-9, *, #)
+            if (/[0-9*#]/.test(key)) {
+                event.preventDefault();
+                sendDTMF(key);
+            }
+        });
+
+        // Widget Event Listeners (V3)
+        const widget = document.querySelector('call-widget');
+        
+        widget.addEventListener('beforeDial', function(event) {
+            console.log('Call about to start', event);
+        });
+        
+        // Listen for V3 call start events
+        const callStartEvents = ['callStarted', 'call.joined', 'callJoined'];
+        callStartEvents.forEach(eventName => {
+            widget.addEventListener(eventName, function(event) {
+                console.log(`V3 Widget: ${eventName}`, event);
+                const call = event.detail?.call || window.call;
+                handleCallConnected(call);
+            });
+        });
+        
+        // Listen for V3 call end events
+        const callEndEvents = ['callEnded', 'call.left', 'destroy'];
+        callEndEvents.forEach(eventName => {
+            widget.addEventListener(eventName, function(event) {
+                console.log(`V3 Widget: ${eventName}`, event);
+                handleCallDisconnected();
+            });
+        });
+
+        // Fallback: Check for window.call periodically
+        setInterval(() => {
+            if (window.call && !currentCall) {
+                console.log('Found call object on window, enabling DTMF');
+                handleCallConnected(window.call);
+            } else if (!window.call && currentCall) {
+                console.log('Call object removed from window, disabling DTMF');
+                handleCallDisconnected();
+            }
+        }, 2000);
+
+        // Initialize notification
+        setTimeout(() => {
+            console.log('Max Electric Payment Support loaded successfully!');
+            console.log('🎯 DTMF: Use keyboard 0-9, *, # during calls');
+        }, 1000);
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,12 @@
+Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+itsdangerous==2.1.2
+click==8.1.7
+blinker==1.6.2
+dotenv==0.9.9
+python-dotenv==1.1.1
+requests==2.32.3
+signalwire_agents==0.1.41
+signalwire-pom==2.7.1 

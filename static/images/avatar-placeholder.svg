@@ -1,0 +1,33 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="#2d3748" stroke="#4299e1" stroke-width="3"/>
+  
+  <!-- Avatar head -->
+  <circle cx="100" cy="80" r="30" fill="#e2e8f0"/>
+  
+  <!-- Avatar body -->
+  <ellipse cx="100" cy="140" rx="40" ry="50" fill="#e2e8f0"/>
+  
+  <!-- Microphone icon -->
+  <rect x="90" y="160" width="20" height="25" rx="10" fill="#4299e1"/>
+  <rect x="95" y="180" width="10" height="8" fill="#4299e1"/>
+  <line x1="85" y1="185" x2="115" y2="185" stroke="#4299e1" stroke-width="2"/>
+  
+  <!-- Audio waves -->
+  <g stroke="#4299e1" stroke-width="2" fill="none" opacity="0.7">
+    <path d="M 130 95 Q 140 100 130 105" class="wave">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 140 90 Q 155 100 140 110" class="wave">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 150 85 Q 170 100 150 115" class="wave">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.6s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="40" text-anchor="middle" fill="#4299e1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    Max Electric Support
+  </text>
+</svg> 

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Max Electric - Powering Your Community{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold text-electric mb-4">
+                        <i class="fas fa-bolt text-warning me-3"></i>
+                        Powering Your Future
+                    </h1>
+                    <p class="lead mb-4">
+                        Welcome to Max Electric's customer portal. Manage your account, view your balance, 
+                        and stay connected with reliable, clean energy solutions.
+                    </p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        {% if not session.customer_id %}
+                            <a href="{{ url_for('login') }}" class="btn btn-electric btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Access Your Account
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-electric btn-lg">
+                                <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                            </a>
+                        {% endif %}
+                        <a href="#services" class="btn btn-outline-electric btn-lg">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <i class="fas fa-charging-station display-1 text-electric animated-icon"></i>
+                    <div class="mt-4">
+                        <div class="energy-meter">
+                            <div class="energy-bar"></div>
+                        </div>
+                        <p class="text-muted mt-2">Clean Energy • Reliable Service • 24/7 Support</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold text-electric">Our Services</h2>
+                <p class="lead">Everything you need to manage your electric service</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="service-card h-100">
+                    <div class="service-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <h4>Account Management</h4>
+                    <p>View your current balance, payment history, and account details in one convenient location.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card h-100">
+                    <div class="service-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h4>24/7 Support</h4>
+                    <p>Get help anytime with our automated phone system and customer service representatives.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card h-100">
+                    <div class="service-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4>Clean Energy</h4>
+                    <p>We're committed to providing sustainable, environmentally friendly energy solutions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold text-electric">Quick Actions</h2>
+                <p class="lead">Common tasks made easy</p>
+            </div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-3 col-sm-6">
+                <div class="quick-action-card text-center">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h5>View Balance</h5>
+                    <p>Check your current account balance</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="quick-action-card text-center">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h5>Make Payment</h5>
+                    <p>Pay your bill securely online</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="quick-action-card text-center">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5>Usage History</h5>
+                    <p>View your energy usage patterns</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="quick-action-card text-center">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h5>Get Support</h5>
+                    <p>Contact our customer service team</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="py-5 bg-electric text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="fw-bold mb-3">
+                    <i class="fas fa-phone me-2"></i>
+                    Need Help? We're Here 24/7
+                </h3>
+                <p class="mb-0">
+                    Our customer service team is ready to assist you with any questions or concerns.
+                    Call us anytime for support with your account, billing, or service issues.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="contact-info">
+                    <div class="mb-2">
+                        <i class="fas fa-phone me-2"></i>
+                        <strong>1-800-MAX-ELEC</strong>
+                    </div>
+                    <div>
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Emergency: 1-800-OUTAGE-1</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Max Electric{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="login-card">
+                <div class="text-center mb-4">
+                    <i class="fas fa-bolt text-electric display-4"></i>
+                    <h2 class="mt-3 text-electric fw-bold">Customer Login</h2>
+                    <p class="text-muted">Access your Max Electric account</p>
+                </div>
+
+                <form method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user me-2"></i>Username
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="username" 
+                               name="username" 
+                               placeholder="Enter your username"
+                               autocomplete="username"
+                               required>
+                        <div class="invalid-feedback">
+                            Please provide your username.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Password
+                        </label>
+                        <input type="password" 
+                               class="form-control form-control-lg" 
+                               id="password" 
+                               name="password" 
+                               placeholder="Enter your password"
+                               autocomplete="current-password"
+                               required>
+                        <div class="invalid-feedback">
+                            Please provide your password.
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-electric btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Account
+                        </button>
+                    </div>
+                </form>
+                <hr class="my-4">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Demo account fill functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const demoButtons = document.querySelectorAll('.demo-fill');
+    
+    demoButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const username = this.getAttribute('data-username');
+            const password = this.getAttribute('data-password');
+            
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            
+            // Add a visual feedback
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Filled!';
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-success');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                this.innerHTML = this.innerHTML.replace('<i class="fas fa-check me-1"></i>Filled!', this.textContent.trim());
+                this.classList.remove('btn-success');
+                this.classList.add('btn-outline-primary');
+            }, 2000);
+            
+            // Focus on password field
+            document.getElementById('password').focus();
+        });
+    });
+});
+</script>
+{% endblock %} 
