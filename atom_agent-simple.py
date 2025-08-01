@@ -31,6 +31,11 @@ class MyAgent(AgentBase):
             voice="rime.spore"
         )
 
+        self.set_params({
+            "video_talking_file": f"http://{NGROK_URL}/video/sigmond_cc_talking.mp4",
+            "video_idle_file": f"http://{NGROK_URL}/video/sigmond_cc_idle.mp4"
+        })
+
         # Define agent personality and behavior
         self.prompt_add_section("Personality and Introduction", body="""You are Atom, a dedicated customer service assistant at Max Electric.
                                 Your primary role is to help customers make bill payments over the phone in a professional, 
@@ -66,7 +71,8 @@ class MyAgent(AgentBase):
         ])
 
         self.prompt_add_section("Step 3: Secure Payment Processing", bullets=[
-            "Gather the credit card information: 'Give me your credit card information including the number, cvv, and billing zip code'",
+            "Gather the credit card information: 'Give me your credit card information including the number, cvv, expiration date, and billing zip code'",
+            "Confirm the credit card information with the customer: 'Is this correct? [credit card information]'",
         ])
 
         self.prompt_add_section("Step 4: Payment Confirmation", bullets=[
@@ -114,6 +120,42 @@ class MyAgent(AgentBase):
                 
         except Exception as e:
             return SwaigFunctionResult("Error retrieving customer data. Please try again.")
+
+    @AgentBase.tool(
+        name="process_payment",
+        description="Process the payment and store it in the database",
+        parameters={
+            # Mock information only requires account number and payment amount for transaction
+            "account_number": {
+                "type": "string",
+                "description": "The customer account number"
+            },
+            "payment_amount": {
+                "type": "number",
+                "description": "The payment amount"
+            }
+        }
+    )
+    def process_payment(self, args, raw_data):
+        """Process the payment and store it in the database"""
+        account_number = args.get('account_number')
+        payment_amount = args.get('payment_amount')
+        
+        if not account_number:
+            return SwaigFunctionResult("Missing account number for payment processing")
+
+        try:
+            # Make API call to process payment
+            response = requests.post(f"{NGROK_URL}/payment-processor?account_number={account_number}", json={'chargeAmount': payment_amount})
+            
+            if response.status_code == 200:
+                return SwaigFunctionResult("Payment processed successfully")
+            else:
+                return SwaigFunctionResult("Payment processing failed. Please try again.")
+            
+        except Exception as e:
+            return SwaigFunctionResult("Error processing payment. Please try again.")
+            
 
 agent = MyAgent(config_file="config.json")
 agent.run()

@@ -270,6 +270,12 @@
                             <button id="modalPaymentCallButton" class="btn btn-electric btn-lg px-5">
                                 <i class="fas fa-phone me-2"></i>Start Secure Payment Call
                             </button>
+                            <div id="dtmfStatus" class="mt-3" style="display: none;">
+                                <div class="alert alert-success border-0 mb-0">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>DTMF Ready!</strong> You can now use keyboard keys 0-9, *, # to enter payment information securely
+                                </div>
+                            </div>
                             <p class="text-muted mt-2 mb-0">
                                 <small><i class="fas fa-info-circle me-1"></i>During your call, use keyboard keys 0-9, *, # to enter payment information securely</small>
                             </p>
@@ -293,14 +299,14 @@
 <c2c-widget
     buttonId="modalPaymentCallButton"
     token="{{ signalwire_call_token }}"
-    callDetails='{"destination": "{{ signalwire_call_destination }}", "supportsVideo": false, "supportsAudio": true, "hideVideo": false, "showTranscription": true}'
+    callDetails='{"destination": "{{ signalwire_call_destination }}", "supportsVideo": true, "supportsAudio": true, "hideVideo": true, "showTranscription": true}'
     collectUserDetails="false"
-    theme="audio-only"
-    mode="audio"
 ></c2c-widget>
 
 <!-- Load SignalWire Click-to-Call Widget Script -->
 <script src="https://cdn.jsdelivr.net/npm/@niravcodes/call-widget/dist/c2c-widget-full.umd.min.js"></script>
+
+
 
 <script>
 
@@ -318,9 +324,11 @@ window.addEventListener('error', function(event) {
 let currentCall = null;
 let isCallActive = false;
 
-// Send DTMF tone
+
+
+// Send DTMF tone for audio calls
 async function sendDTMF(digit) {
-    if (!currentCall || !isCallActive) {
+    if (!isCallActive) {
         console.warn('No active call to send DTMF to');
         return;
     }
@@ -329,18 +337,18 @@ async function sendDTMF(digit) {
         console.log(`Sending DTMF: ${digit}`);
         
         // Try multiple methods to send DTMF based on SignalWire patterns
-        if (currentCall.sendDigits) {
+        if (currentCall && currentCall.sendDigits) {
             await currentCall.sendDigits(digit);
+            console.log(`DTMF ${digit} sent successfully via currentCall`);
         } else if (window.call && window.call.sendDigits) {
             await window.call.sendDigits(digit);
-        } else if (currentCall.member && currentCall.member.sendDigits) {
+            console.log(`DTMF ${digit} sent successfully via window.call`);
+        } else if (currentCall && currentCall.member && currentCall.member.sendDigits) {
             await currentCall.member.sendDigits(digit);
+            console.log(`DTMF ${digit} sent successfully via currentCall.member`);
         } else {
             console.error('sendDigits method not found on call object');
-            return;
         }
-        
-        console.log(`DTMF ${digit} sent successfully`);
         
     } catch (error) {
         console.error('Error sending DTMF:', error);
@@ -353,12 +361,24 @@ function handleCallConnected(call) {
     console.log('Call connected');
     currentCall = call;
     isCallActive = true;
+    
+    // Show DTMF ready indicator
+    const dtmfStatus = document.getElementById('dtmfStatus');
+    if (dtmfStatus) {
+        dtmfStatus.style.display = 'block';
+    }
 }
 
 function handleCallDisconnected() {
     console.log('Call disconnected');
     currentCall = null;
     isCallActive = false;
+    
+    // Hide DTMF ready indicator
+    const dtmfStatus = document.getElementById('dtmfStatus');
+    if (dtmfStatus) {
+        dtmfStatus.style.display = 'none';
+    }
 }
 
 // Payment modal call widget functionality
@@ -400,22 +420,27 @@ document.addEventListener('DOMContentLoaded', function() {
         widget.addEventListener('callStarted', function(event) {
             console.log('c2c-widget: Call started', event);
             currentCall = event.detail?.call || window.call;
-            isCallActive = true;
-            handleCallConnected(currentCall);
+            console.log('Call object available, waiting for connection...');
         });
 
         widget.addEventListener('callConnected', function(event) {
             console.log('c2c-widget: Call connected', event);
             currentCall = event.detail?.call || window.call;
+            
+            // Enable DTMF functionality immediately for audio calls
             isCallActive = true;
             handleCallConnected(currentCall);
+            console.log('DTMF enabled for audio call');
         });
 
         widget.addEventListener('callJoined', function(event) {
             console.log('c2c-widget: Call joined', event);
             currentCall = event.detail?.call || window.call;
+            
+            // Enable DTMF functionality for audio calls
             isCallActive = true;
             handleCallConnected(currentCall);
+            console.log('DTMF enabled after call joined');
         });
 
         // Listen for call end events to disable DTMF

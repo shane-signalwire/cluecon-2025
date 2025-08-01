@@ -6,7 +6,7 @@ A web application for customers to view their account balance and information
 
 import sqlite3
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -289,6 +289,72 @@ def get_customer_data():
 def call_support():
     """Click-to-call support page"""
     return render_template('call_support.html', signalwire_call_token=SIGNALWIRE_CALL_TOKEN, signalwire_call_destination=SIGNALWIRE_CALL_DESTINATION)
+
+@app.route('/video/<filename>')
+def serve_video(filename):
+    """Serve MP4 video files from static/video directory"""
+    try:
+        # Security check: only allow MP4 files
+        if not filename.lower().endswith('.mp4'):
+            app.logger.warning(f"Attempted access to non-MP4 file: {filename}")
+            return jsonify({'error': 'Only MP4 files are allowed'}), 400
+        
+        # Security check: prevent directory traversal
+        if '..' in filename or '/' in filename or '\\' in filename:
+            app.logger.warning(f"Attempted directory traversal with filename: {filename}")
+            return jsonify({'error': 'Invalid filename'}), 400
+        
+        # Log the video request
+        app.logger.info(f"Video request for: {filename}")
+        
+        # Serve the file from static/video directory
+        return send_from_directory(
+            directory=os.path.join(app.root_path, 'static', 'video'),
+            path=filename,
+            as_attachment=False,  # Stream the video instead of downloading
+            mimetype='video/mp4'
+        )
+        
+    except FileNotFoundError:
+        app.logger.warning(f"Video file not found: {filename}")
+        return jsonify({'error': 'Video file not found'}), 404
+    except Exception as e:
+        app.logger.error(f"Error serving video {filename}: {e}")
+        return jsonify({'error': 'Error serving video file'}), 500
+
+@app.route('/video')
+def list_videos():
+    """List available MP4 video files"""
+    try:
+        video_dir = os.path.join(app.root_path, 'static', 'video')
+        
+        # Check if video directory exists
+        if not os.path.exists(video_dir):
+            return jsonify({'videos': [], 'message': 'Video directory not found'})
+        
+        # Get all MP4 files in the video directory
+        video_files = []
+        for filename in os.listdir(video_dir):
+            if filename.lower().endswith('.mp4'):
+                file_path = os.path.join(video_dir, filename)
+                file_size = os.path.getsize(file_path)
+                video_files.append({
+                    'filename': filename,
+                    'url': url_for('serve_video', filename=filename),
+                    'size_bytes': file_size,
+                    'size_mb': round(file_size / (1024 * 1024), 2)
+                })
+        
+        app.logger.info(f"Listed {len(video_files)} video files")
+        
+        return jsonify({
+            'videos': video_files,
+            'count': len(video_files)
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error listing videos: {e}")
+        return jsonify({'error': 'Error listing video files'}), 500
 
 ## Mock Payment Processor ##
 @app.route('/payment-processor', methods=['POST'])

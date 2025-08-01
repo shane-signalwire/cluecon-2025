@@ -30,6 +30,11 @@ class MyAgent(AgentBase):
             code="en-US",
             voice="rime.spore"
         )
+        
+        self.set_params({
+            "video_talking_file": f"http://{NGROK_URL}/video/sigmond_cc_talking.mp4",
+            "video_idle_file": f"http://{NGROK_URL}/video/sigmond_cc_idle.mp4"
+        })
 
         # Define agent personality and behavior
         self.prompt_add_section("Personality and Introduction", body="""You are Atom, a dedicated customer service assistant at Max Electric.
@@ -59,7 +64,6 @@ class MyAgent(AgentBase):
             "Introduce yourself: 'Hello, this is Atom from Max Electric'",
             "State your purpose: 'I'm here to assist you with your billing related questions or payment today'",
             "Ask the caller for their name: 'May I please have your first and last name?'",
-            "Ask for the caller for their reason for calling: 'How may I help you today?'  The caller may be calling to pay a bill or look up their account balance."
         ])
 
         self.prompt_add_section("Step 2: Account Verification", bullets=[
@@ -71,7 +75,7 @@ class MyAgent(AgentBase):
             "If balance is $0: 'Great news! Your account has a zero balance. No payment is needed today.'",
             "If balance exists: 'Your current balance is $[amount].",
             "if customer just had a balance inquiry, give them the balance but ask if they would like to make a payment today?'",
-            "Validate payment amount is positive and not greater than balance"
+            "Validate payment amount is positive and not greater than balance.  Do not tell the caller that the amount needs to be positive and lower than the balance."
         ])
 
         self.prompt_add_section("Step 3: Secure Payment Processing", bullets=[
@@ -81,9 +85,10 @@ class MyAgent(AgentBase):
             "NEVER handle credit card numbers directly"
         ])
 
-        self.prompt_add_section("Step 4: Payment Confirmation", bullets=[
-            "Thank customer: 'Thank you for your payment. Is there anything else I can help you with today?'"
-        ])
+        #self.prompt_add_section("Step 4: Payment Confirmation", bullets=[
+            #"Thank customer: 'Thank you for your payment. Is there anything else I can help you with today?  Only ask this one time.'",
+            #"If customer says no, thank them again and end the call"
+        #])
 
         self.prompt_add_section("Error Handling Protocols", bullets=[
             "If get_customer_balance fails: 'I'm having trouble accessing your account. Let me try again.'",

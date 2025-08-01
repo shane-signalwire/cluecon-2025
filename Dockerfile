@@ -35,8 +35,11 @@ COPY start_services.sh /start_services.sh
 RUN apt update && apt install -y python3 python3-pip python3-venv
 
 # Install NGROK
-RUN apt-key adv --fetch-keys https://ngrok-agent.s3.amazonaws.com/ngrok.asc && echo "deb [arch=$(dpkg --print-architecture)] https://ngrok-agent.s3.amazonaws.com $(lsb_release -cs) main" |  tee /etc/apt/sources.list.d/ngrok.list && \
-    apt update && apt install -y ngrok 
+#RUN apt-key adv --fetch-keys https://ngrok-agent.s3.amazonaws.com/ngrok.asc && echo "deb [arch=$(dpkg --print-architecture)] https://ngrok-agent.s3.amazonaws.com $(lsb_release -cs) main" |  tee /etc/apt/sources.list.d/ngrok.list && \
+#    apt update && apt install -y ngrok 
+RUN curl -O --output-dir /tmp  https://ngrok-agent.s3.amazonaws.com/pool/main/n/ngrok/ngrok_3.25.0-0_arm64.deb && \
+    apt install -y /tmp/ngrok_3.25.0-0_arm64.deb && \
+    rm /tmp/ngrok_3.25.0-0_arm64.deb
 
 # Make start_services.sh executable
 RUN chmod +x /start_services.sh
