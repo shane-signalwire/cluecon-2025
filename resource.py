@@ -27,6 +27,7 @@ if primary_script_url is None:
 signalwire_space = os.environ.get('SIGNALWIRE_SPACE')
 signalwire_project_id = os.environ.get('SW_PROJECT_ID')
 signalwire_rest_api_token = os.environ.get('SW_REST_API_TOKEN')
+display_name = os.environ.get('DISPLAY_NAME', 'ClueCon 2025 - Pay Demo')
 
 if signalwire_space is None or \
     signalwire_project_id is None or \
@@ -42,8 +43,6 @@ headers = {
     'Accept': 'application/json',
     'Authorization': f'Basic {auth}'
 }
-display_name = 'Payment Collector - ClueCon 2025'
-
 
 # FUNCTIONS #
 def get_swml_webhooks():
