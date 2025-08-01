@@ -3,6 +3,9 @@ FROM debian:bullseye-slim
 
 EXPOSE 8080
 
+# Build argument to specify which agent file to use
+ARG AGENT_TYPE=advanced
+
 # Install basic packages
 RUN apt update && apt install -y \
     curl \
@@ -20,6 +23,8 @@ COPY .env /app/.env
 COPY app.py /app/app.py
 COPY atom_agent-advanced.py /app/atom_agent-advanced.py
 COPY atom_agent-simple.py /app/atom_agent-simple.py
+# Copy the specified agent as the main agent file
+COPY atom_agent-${AGENT_TYPE}.py /app/atom_agent.py
 COPY templates /app/templates
 COPY static /app/static
 COPY requirements.txt /app/requirements.txt

@@ -72,12 +72,14 @@ This application demonstrates:
 
 3. **Build and run with Make commands:**
    ```bash
-   # Quick setup (builds and runs in one command)
-   make setup
+   # Quick setup with advanced agent (recommended)
+   make advanced
    
-   # Or use individual commands:
-   make build    # Build the Docker image
-   make run      # Run the container
+   # Or use simple agent for testing
+   make simple
+   
+   # Or traditional setup (defaults to advanced agent)
+   make setup
    ```
 
 4. **Access the application:**
@@ -99,8 +101,8 @@ This application demonstrates:
    # Copy the sample environment file
    cp env.sample .env
    
-   # Edit .env with your SignalWire credentials and agent selection
-   vim .env  # Make sure to set AGENT_PROMPT_FILE to your preferred demo
+   # Edit .env with your SignalWire credentials
+   vim .env
    ```
 
 3. **Run the application:**
@@ -128,12 +130,12 @@ This application demonstrates:
    SW_REST_API_TOKEN=your-rest-api-token-here
 
    # SignalWire Call Widget (Required)
+   DISPLAY_NAME=<swml-resource-display-name>
    SIGNALWIRE_CALL_TOKEN=your-call-widget-token-here
-   SIGNALWIRE_CALL_DESTINATION=/public/payment-collector-123
+   SIGNALWIRE_CALL_DESTINATION=<call-widget-destination-address>
 
-   # AI Agent Configuration (Required)
-   POST_PROMPT_URL=""
-   AGENT_PROMPT_FILE=atom_agent-advanced.py
+   # AI Agent Configuration (Optional)
+   POST_PROMPT_URL=<your-post-prompt-url>
 
    # Ngrok Configuration (Required)
    NGROK_TOKEN=your-ngrok-token-here
@@ -141,19 +143,28 @@ This application demonstrates:
 
 ### **Agent Demo Selection**
 
-The `AGENT_PROMPT_FILE` variable determines which AI agent demo to run:
+The application now supports two different AI agent implementations, selected at build time:
 
-- **`atom_agent-advanced.py`** (Recommended): Full-featured payment agent with PIN validation, DataMap tools, and comprehensive payment processing
-- **`atom_agent-simple.py`**: Basic agent with simplified payment flow for testing
+- **Advanced Agent** (`atom_agent-advanced.py`): Full-featured payment agent with PIN validation, DataMap tools, and comprehensive payment processing
+- **Simple Agent** (`atom_agent-simple.py`): Basic agent with simplified payment flow for testing
 
-**To switch between demos:**
+**To choose your agent implementation:**
+
 ```bash
-# For advanced demo (default)
-AGENT_PROMPT_FILE=atom_agent-advanced.py
+# Build and run with advanced agent (recommended)
+make advanced
 
-# For simple demo
-AGENT_PROMPT_FILE=atom_agent-simple.py
+# Build and run with simple agent (for testing)
+make simple
+
+# Development mode with advanced agent
+make dev-advanced
+
+# Development mode with simple agent  
+make dev-simple
 ```
+
+The chosen agent file is copied as `atom_agent.py` during the Docker build process, eliminating any runtime configuration needed.
 
 ### **SignalWire Setup**
 
@@ -197,8 +208,8 @@ pay-demo-cc25/
 ├── env.sample                  # Environment template (copy to .env)
 ├── .env                        # Your environment configuration (create from env.sample)
 ├── start_services.sh           # Application startup script
-├── Dockerfile                  # Docker container configuration
-├── Makefile                    # Docker management commands
+├── Dockerfile                  # Docker container configuration (with build args)
+├── Makefile                    # Docker management commands with agent selection
 ├── templates/                  # HTML templates
 │   ├── base.html              # Base template with SignalWire styling
 │   ├── dashboard.html         # Customer dashboard with call widget
@@ -210,6 +221,9 @@ pay-demo-cc25/
     ├── js/
     │   └── main.js            # Frontend JavaScript
     └── images/
+    
+Note: During Docker build, either atom_agent-advanced.py or atom_agent-simple.py 
+is copied as atom_agent.py based on the selected build target.
 ```
 
 ## 🔧 **Key Components**
@@ -225,6 +239,7 @@ pay-demo-cc25/
 - **Customer Lookup**: Retrieves customer balances and information
 - **Natural Language**: Processes voice commands and responses
 - **DTMF Support**: Handles keypad input for sensitive data
+- **Build-time Selection**: Copied from either `atom_agent-advanced.py` or `atom_agent-simple.py` during Docker build
 
 ### **3. Call Widget (`templates/dashboard.html`)**
 - **c2c-widget Implementation**: Brian Kwest's proven approach
@@ -273,11 +288,15 @@ The included `Makefile` provides convenient Docker commands for easy application
 ### **Essential Commands**
 
 ```bash
-# Quick start (build and run in one command)
-make setup         # or make quick-start
+# Quick start with agent selection
+make advanced      # Build and run with advanced agent (recommended)
+make simple        # Build and run with simple agent (for testing)
+make setup         # Traditional setup (defaults to advanced agent)
 
 # Individual commands
-make build         # Build the Docker image
+make build         # Build the Docker image (defaults to advanced agent)
+make build-advanced # Build with advanced agent
+make build-simple  # Build with simple agent
 make run           # Build and run the container
 make run-only      # Run container (assumes image exists)
 make stop          # Stop and remove the container
@@ -287,8 +306,10 @@ make restart       # Stop and restart the container
 ### **Development Commands**
 
 ```bash
-# Development with hot-reload
-make dev           # Run with volume mounts for live editing
+# Development with hot-reload and agent selection
+make dev-advanced  # Development mode with advanced agent
+make dev-simple    # Development mode with simple agent
+make dev           # Traditional dev mode (defaults to advanced agent)
 
 # View application output
 make logs          # Follow container logs
@@ -321,10 +342,15 @@ make help          # Show all available commands
 # Initial setup
 cp env.sample .env
 # Edit .env with your credentials
-make setup
+make advanced      # Start with advanced agent (recommended)
+
+# Or for testing/development
+make simple        # Start with simple agent
 
 # During development
-make dev           # Start development mode
+make dev-advanced  # Development with advanced agent
+# or
+make dev-simple    # Development with simple agent
 make logs          # Monitor logs in another terminal
 
 # When done
@@ -360,7 +386,7 @@ make stop          # Stop the application
 **Common Issues:**
 
 - **Missing .env file**: Make sure you've copied `env.sample` to `.env` and configured it
-- **Wrong Agent Demo**: Check `AGENT_PROMPT_FILE` in `.env` points to the correct agent file
+- **Wrong Agent Version**: Use `make advanced` for full features or `make simple` for basic testing
 - **Call Widget Not Working**: Check `SIGNALWIRE_CALL_TOKEN` and destination URL
 - **Agent Not Responding**: Verify ngrok tunnel and webhook configuration  
 - **DTMF Not Working**: Ensure call is active and event listeners are attached
@@ -374,6 +400,7 @@ make stop          # Stop the application
 4. Test ngrok tunnel: Visit displayed URL
 5. Check SignalWire webhook status in dashboard
 6. Monitor browser console for JavaScript errors
+7. Try rebuilding with specific agent: `make clean && make advanced` or `make clean && make simple`
 
 ## 📚 **API Reference**
 

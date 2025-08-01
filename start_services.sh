@@ -36,7 +36,7 @@ fi
 source .env
 
 # Validate required environment variables
-REQUIRED_VARS=("NGROK_TOKEN" "SIGNALWIRE_SPACE" "SW_PROJECT_ID" "SW_REST_API_TOKEN" "AGENT_PROMPT_FILE")
+REQUIRED_VARS=("NGROK_TOKEN" "SIGNALWIRE_SPACE" "SW_PROJECT_ID" "SW_REST_API_TOKEN")
 for var in "${REQUIRED_VARS[@]}"; do
     if [[ -z "${!var:-}" ]]; then
         error "Required environment variable $var is not set!"
@@ -155,7 +155,7 @@ EOF
 
 # Start agent service
 log "Starting agent service..."
-python3 $AGENT_PROMPT_FILE > /tmp/agent.log 2>&1 &
+python3 atom_agent.py > /tmp/agent.log 2>&1 &
 AGENT_PID=$!
 
 # Wait for agent to be ready

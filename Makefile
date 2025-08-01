@@ -16,13 +16,29 @@ help: ## Show this help message
 	@echo ""
 	@echo "Quick Start:"
 	@echo "  make run          # Build and run the container"
+	@echo "  make advanced     # Build and run with advanced agent"
+	@echo "  make simple       # Build and run with simple agent"
+	@echo "  make dev-advanced # Development mode with advanced agent"
+	@echo "  make dev-simple   # Development mode with simple agent"
 	@echo "  make stop         # Stop the running container"
 	@echo "  make logs         # View container logs"
 
 .PHONY: build
-build: ## Build the Docker image
-	@echo "🔨 Building Docker image: $(IMAGE_NAME)"
-	docker build -t $(IMAGE_NAME) .
+build: ## Build the Docker image (defaults to advanced agent)
+	@echo "🔨 Building Docker image: $(IMAGE_NAME) (defaults to advanced agent)"
+	docker build --build-arg AGENT_TYPE=advanced -t $(IMAGE_NAME) .
+	@echo "✅ Build complete!"
+
+.PHONY: build-advanced
+build-advanced: ## Build the Docker image with advanced agent
+	@echo "🔨 Building Docker image: $(IMAGE_NAME) (advanced agent)"
+	docker build --build-arg AGENT_TYPE=advanced -t $(IMAGE_NAME) .
+	@echo "✅ Build complete!"
+
+.PHONY: build-simple
+build-simple: ## Build the Docker image with simple agent
+	@echo "🔨 Building Docker image: $(IMAGE_NAME) (simple agent)"
+	docker build --build-arg AGENT_TYPE=simple -t $(IMAGE_NAME) .
 	@echo "✅ Build complete!"
 
 .PHONY: run-only
@@ -43,6 +59,12 @@ run-only: ## Run the container (assumes image is already built)
 .PHONY: run
 run: build run-only ## Build and run the container (one command)
 
+.PHONY: advanced
+advanced: build-advanced run-only ## Build and run the container with advanced agent
+
+.PHONY: simple
+simple: build-simple run-only ## Build and run the container with simple agent
+
 .PHONY: dev
 dev: ## Run container with volume mounts for development
 	@echo "🔧 Starting development container with volume mounts"
@@ -60,6 +82,44 @@ dev: ## Run container with volume mounts for development
 		$(IMAGE_NAME)
 	@echo "✅ Development container started on http://localhost:$(HOST_PORT)"
 	@echo "📁 Volume mounts: templates/, static/, app.py"
+
+.PHONY: dev-advanced
+dev-advanced: build-advanced ## Run container with volume mounts for development using advanced agent
+	@echo "🔧 Starting development container with volume mounts (advanced agent)"
+	@if [ $$(docker ps -q -f name=$(CONTAINER_NAME)) ]; then \
+		echo "⚠️  Container $(CONTAINER_NAME) is already running"; \
+		make stop; \
+	fi
+	docker run -d \
+		--name $(CONTAINER_NAME) \
+		-p $(HOST_PORT):$(PORT) \
+		--env-file .env \
+		-v $$(pwd)/templates:/app/templates \
+		-v $$(pwd)/static:/app/static \
+		-v $$(pwd)/app.py:/app/app.py \
+		-v $$(pwd)/atom_agent-advanced.py:/app/atom_agent.py \
+		$(IMAGE_NAME)
+	@echo "✅ Development container started on http://localhost:$(HOST_PORT) with advanced agent"
+	@echo "📁 Volume mounts: templates/, static/, app.py, atom_agent.py (advanced)"
+
+.PHONY: dev-simple
+dev-simple: build-simple ## Run container with volume mounts for development using simple agent
+	@echo "🔧 Starting development container with volume mounts (simple agent)"
+	@if [ $$(docker ps -q -f name=$(CONTAINER_NAME)) ]; then \
+		echo "⚠️  Container $(CONTAINER_NAME) is already running"; \
+		make stop; \
+	fi
+	docker run -d \
+		--name $(CONTAINER_NAME) \
+		-p $(HOST_PORT):$(PORT) \
+		--env-file .env \
+		-v $$(pwd)/templates:/app/templates \
+		-v $$(pwd)/static:/app/static \
+		-v $$(pwd)/app.py:/app/app.py \
+		-v $$(pwd)/atom_agent-simple.py:/app/atom_agent.py \
+		$(IMAGE_NAME)
+	@echo "✅ Development container started on http://localhost:$(HOST_PORT) with simple agent"
+	@echo "📁 Volume mounts: templates/, static/, app.py, atom_agent.py (simple)"
 
 .PHONY: stop
 stop: ## Stop and remove the running container
@@ -161,16 +221,17 @@ update-env: ## Update environment variables (restart required)
 
 # Utility targets
 .PHONY: check-env
-check-env: ## Check if env file exists and show variables
+check-env: ## Check if .env file exists and show variables
 	@echo "🔍 Checking environment configuration:"
-	@if [ -f env ]; then \
-		echo "✅ env file exists"; \
+	@if [ -f .env ]; then \
+		echo "✅ .env file exists"; \
 		echo ""; \
 		echo "📋 Environment variables:"; \
-		cat env | grep -v '^#' | grep -v '^$$'; \
+		cat .env | grep -v '^#' | grep -v '^$$'; \
 	else \
-		echo "❌ env file not found!"; \
-		echo "   Make sure you have an 'env' file in the project root"; \
+		echo "❌ .env file not found!"; \
+		echo "   Copy env.sample to .env and configure your variables"; \
+		echo "   cp env.sample .env"; \
 	fi
 
 .PHONY: open
